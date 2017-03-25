@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs');
 
 var user = mongoose.Schema({
+    id : String,
     firstName : String,
     LastName : String,
     username : String,
@@ -13,8 +14,8 @@ var user = mongoose.Schema({
     twitter : String,
     email : String,
     password : String,
-
 });
+
 user.methods.generateHash = function(password){
     return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
 }
