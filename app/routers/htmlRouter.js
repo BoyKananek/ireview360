@@ -7,7 +7,10 @@ var uuid = require('uuid');
 
 router.get('/',function(req,res){
     console.log('get request');
-    res.end('Hello');
+    res.end('Comming soon!!!!');
+})
+router.get('/login',function(req,res){
+    
 })
 
 module.exports = router;
