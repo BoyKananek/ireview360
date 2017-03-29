@@ -14,6 +14,7 @@ let transporter = nodemailer.createTransport({
         pass: ''
     }
 });
+
 //create new user (Blogger)
 router.post('/v1/signup',function(req,res){
     console.log('In');
