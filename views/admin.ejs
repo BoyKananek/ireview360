@@ -1,0 +1,60 @@
+<html>
+  <head>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  </head>
+  <body>
+      <table class="table">
+    <thead>
+      <tr>
+        <th>Firstname</th>
+        <th>Lastname</th>
+        <th>Username</th>
+        <th>Facebook page</th>
+        <th>Email</th>
+        <th> Action </th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for(var i=0; i < users.length ; i++){ %>
+      <tr>
+          <td>
+              <%= users[i].firstName %>
+          </td>
+          <td>
+              <%= users[i].lastName %>
+          </td>
+          <td>
+              <%= users[i].username %>
+          </td>
+          <td> 
+              <%= users[i].facebookPage %>
+          </td>
+          <td>
+              <%= users[i].email %>
+          </td>
+          <td>
+              <a href="JavaScript:verify('<%= users[i].id %>')" >Verify </button> 
+          </td>
+      </tr>
+      <% } %> 
+    </tbody>
+  </table>
+
+  </body>
+    <script>
+        function verify(id){
+            var json = { 
+                id : id
+            }
+            $.post('/api/v1/sendVerify',json,function(data,status){
+                json = null;
+                alert(data.message);
+                window.location.replace('/admin');
+            })
+        }
+    </script>   
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</html>
