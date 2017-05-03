@@ -10,8 +10,8 @@ var RequestNewPassword = require('../models/requestPass');
 let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: '',
-        pass: ''
+        user: '///',
+        pass: '//'
     }
 });
 
