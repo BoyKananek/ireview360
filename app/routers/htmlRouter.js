@@ -11,7 +11,7 @@ router.get('/',function(req,res){
     res.end('Comming soon!!!!');
 })
 router.get('/signup',function(req,res){
-    res.render('signup');
+    res.render('register');
 })
 router.get('/login',function(req,res){
     res.render('login');
