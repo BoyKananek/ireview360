@@ -78,8 +78,6 @@ $state-danger-text:              #ff3015 !default;
 $state-danger-bg:                #FFCCC5 !default;
 $state-danger-border:            darken($state-danger-bg, 5%) !default;
 
-// Flex
 $enable-flex:               false !default;
-
 //Import bootstrap variables
 @import "bootstrap/variables";

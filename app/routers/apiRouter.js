@@ -10,37 +10,53 @@ var RequestNewPassword = require('../models/requestPass');
 let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: '///',
-        pass: '//'
+        user: '',
+        pass: ''
     }
 });
 
 //create new user (Blogger)
-router.post('/v1/signup',function(req,res){
-    console.log('In');
+router.post('/v1/signup', function (req, res) {
     console.log(req.body.firstName);
     var requestedUser = new RequestedUser();
-    User.find( {$or: [{'email':req.body.email},{'username':req.body.username}]},function(err,result){
-        if(err){
+    User.find({ $or: [{ 'email': req.body.email }, { 'username': req.body.username }] }, function (err, result) {
+        if (err) {
             console.log(err);
-            res.json({error: true, message : err});
-        }else{
+            res.json({ error: true, message: err });
+        } else {
             console.log(result);
-            if(result.length == 0){
+            if (result.length == 0) {
                 console.log('not found');
                 requestedUser.id = uuid.v4();
-                requestedUser.firstName = req.body.firstName;
-                requestedUser.lastName = req.body.lastName;
                 requestedUser.username = req.body.username;
-                requestedUser.mobile = req.body.mobile;
-                requestedUser.categories = req.body.categories
-                requestedUser.facebookPage = req.body.facebook;
-                requestedUser.instagram = req.body.instagram;
-                requestedUser.youtubeChannel = req.body.youtube;
-                requestedUser.twitter = req.body.twitter;
                 requestedUser.email = req.body.email;
                 requestedUser.password = requestedUser.generateHash(req.body.password);
+                var link = req.protocol + '://' + req.get('host') + "/api/v1/verify?id=" +  requestedUser.id;
                 let mailOptions = {
+                    from: 'kananek.ati@gmail.com', // sender address
+                    to: req.body.email, // list of receivers
+                    subject: '[iReview360 system] Please verify your account', // Subject line
+                    html: "Hi, Please click this <a href='" + link + "'> link </a> to verify your account." // html body
+                };
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        return console.log(error);
+                    } else {
+                        console.log('Send verified email');
+                        requestedUser.save(function (err) {
+                            if (err) {
+                                console.log(err);
+                                res.json({ error: true, message: err });
+                            } else {
+                                console.log('Save in requested user');
+                                console.log("Request complete!!");
+                                res.json({ error: false, message: 'Request successful!' });
+                            }
+                        })
+                    }
+                });
+
+                /*let mailOptions = {
                     from: 'kananek.ati@gmail.com', // sender address
                     to: req.body.email, // list of receivers
                     subject: '[iReview360 system] Your account is already registered', // Subject line
@@ -61,94 +77,90 @@ router.post('/v1/signup',function(req,res){
                                     }
                     })
                     console.log("Send the email already");
-                });
-            }else{
-                res.json({error:false, message: "This email or username already exsiting in the system"});
+                });*/
+            } else {
+                res.json({ error: false, message: "This email or username already exsiting in the system" });
             }
         }
     })
 });
-router.post('/v1/sendVerify',function(req,res){
-    var link = req.protocol + '://' + req.get('host')+ "/api/v1/verify?id="+req.body.id;
-    RequestedUser.findOne({id:req.body.id},function(err,result){
-        if(err){
+
+/*
+router.post('/v1/sendVerify', function (req, res) {
+    var link = req.protocol + '://' + req.get('host') + "/api/v1/verify?id=" + req.body.id;
+    RequestedUser.findOne({ id: req.body.id }, function (err, result) {
+        if (err) {
             console.log(err);
-            res.json({error:true,message: err});
-        }else{
+            res.json({ error: true, message: err });
+        } else {
             let mailOptions = {
-                    from: 'kananek.ati@gmail.com', // sender address
-                    to: result.email, // list of receivers
-                    subject: '[iReview360 system] Verify successful', // Subject line
-                    html: "Hi, <br> Your account is already verified by Admin, Please click this <a href='"+link+"'> link </a> to continue" // html body
+                from: 'kananek.ati@gmail.com', // sender address
+                to: result.email, // list of receivers
+                subject: '[iReview360 system] Verify successful', // Subject line
+                html: "Hi, <br> Your account is already verified by Admin, Please click this <a href='" + link + "'> link </a> to continue" // html body
             };
             transporter.sendMail(mailOptions, (error, info) => {
-                    if (error) {
-                        return console.log(error);
-                    }else{
-                        console.log('Send verified email');
-                        res.json({error:false,message: "Already send verified email to user"});
-                    }
+                if (error) {
+                    return console.log(error);
+                } else {
+                    console.log('Send verified email');
+                    res.json({ error: false, message: "Already send verified email to user" });
+                }
             });
         }
     })
 })
+*/
+
 //get verify by link www.ireview360.com/verify?id={{String}}
-router.get('/v1/verify',function(req,res){
+router.get('/v1/verify', function (req, res) {
     var db = new User();
     var id;
-    RequestedUser.findOne({'id':req.query.id},function(err,result){
-        if(err){
+    RequestedUser.findOne({ 'id': req.query.id }, function (err, result) {
+        if (err) {
             console.log(err);
-            res.json({error:true,message: err});
-            res.render("oops",{data:err});
-        }else{
-            if(result){
-                db.firstName = result.firstName;
-                db.lastName = result.lastName;
+            res.json({ error: true, message: err });
+            res.render("oops", { data: err });
+        } else {
+            if (result) {
                 db.username = result.username.toLowerCase();
-                db.mobile = result.mobile;
-                db.categories = result.categories;
-                db.facebookPage = result.facebookPage;
-                db.instagram = result.instagram;
-                db.youtubeChannel = result.youtubeChannel;
-                db.twitter = result.twitter;
                 db.email = result.email.toLowerCase();
                 db.password = result.password;
-                db.save(function(err){
-                    if(err){
+                db.save(function (err) {
+                    if (err) {
                         console.log(err);
-                    }else{
-                        res.render("verifyPage",{data: result});
+                    } else {
+                        res.render("verifyPage", { data: result });
                         console.log("Save successful");
-                        RequestedUser.remove({'email':result.email},function(err,result2){
-                            if(err){
+                        RequestedUser.remove({ 'email': result.email }, function (err, result2) {
+                            if (err) {
                                 console.log(err);
-                            }else{
+                            } else {
                                 console.log('Remove requested account');
                             }
                         })
                     }
                 })
-            }else{
+            } else {
                 console.log("This account is not verify");
                 //res.json({error: false,message: 'This account is not verify'});
-                res.render("oops",{data : 'This account is not verify' });
+                res.render("oops", { data: 'This account is not verify' });
             }
         }
     })
 })
-router.post('/v1/login',function(req,res){
+router.post('/v1/login', function (req, res) {
     var session = new Session();
-    User.findOne({'username':req.body.username},function(err,user){
-        if(err){
+    User.findOne({ 'username': req.body.username }, function (err, user) {
+        if (err) {
             console.log(err);
-            res.json({error:true,message:err});
-        }else{
-            if( user == null){
+            res.json({ error: true, message: err });
+        } else {
+            if (user == null) {
                 res.cookie('success', false, { expires: new Date(new Date().getTime() + 60000) });
                 console.log('Authentication failed; email or password is incorrect. Try again.');
                 res.redirect('/login');
-            }else{
+            } else {
                 if (!user.validPassword(req.body.password)) {
                     res.cookie('success', false, { expires: new Date(new Date().getTime() + 60000) });
                     console.log('Authentication failed; email or password is incorrect. Try again.')
@@ -159,17 +171,17 @@ router.post('/v1/login',function(req,res){
                     var secret = uuid.v4();
                     session.secret = secret;
                     session.username = user.username;
-                    session.save(function(err){
-                        if(err){
+                    session.save(function (err) {
+                        if (err) {
                             res.end(err);
-                        }else{
+                        } else {
                             console.log("Login successfully");
                             res.cookie('secret', secret, { expires: new Date(new Date().getTime() + 1296000000) });
                             res.clearCookie("success");
                             res.redirect('/home');
                         }
                     })
-            }
+                }
             }
         }
     })
@@ -196,16 +208,16 @@ router.post("/v1/forgetPass", function (req, res) {
             if (result) {
                 var requestPass = new RequestNewPassword();
                 var rand = uuid.v4();
-                link = req.protocol + '://' + req.get('host')+"/api/requestNewPassword?id=" + rand;
+                link = req.protocol + '://' + req.get('host') + "/api/requestNewPassword?id=" + rand;
                 var mailOptions = {
                     from: "kananek.ati@gmail.com",
                     to: req.body.email,
                     subject: "[iReview360] Reset Password System",
-                    html: "Hi, <br> Your username is "+result.username+" <br> Please click this <a href=" + link + "> link </a> to change your password"
+                    html: "Hi, <br> Your username is " + result.username + " <br> Please click this <a href=" + link + "> link </a> to change your password"
                 }
                 requestPass.id = rand;
                 requestPass.email = req.body.email;
-                
+
                 transporter.sendMail(mailOptions, function (error, response) {
                     if (error) {
                         console.log(error);
@@ -241,7 +253,7 @@ router.get('/requestNewPassword', function (req, res) {
         } else if (result != null) {
             if (result.id == req.query.id) {
                 res.render('resetpassword', { 'email': result.email });
-            } else { 
+            } else {
                 res.render('already', { data: "You have successfully changed your password previously." })
             }
         } else {
@@ -251,7 +263,7 @@ router.get('/requestNewPassword', function (req, res) {
 
 });
 
-router.post('/updatePass',function(req,res){
+router.post('/updatePass', function (req, res) {
     var db = new User();
     console.log(req.body.email);
     var password = db.generateHash(req.body.password); // encode password 
